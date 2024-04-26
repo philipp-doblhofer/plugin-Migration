@@ -72,7 +72,7 @@ No premium feature data is currently being migrated.
 ### Migrating from a WordPress multisite
 
 If you want to migrate data from a WordPress multisite, keep in mind, that the individual WordPress sites of the multisite are using different table prefixes (e.g. `wp_` for site 1, `wp_2`for site 2 and so on). This is also the case for the tables which were created from Matomo for WordPress.
-As a result of that, each site in Matomo has the site-id 1. In order to gather data for other than the first page, it is required to replace the table prefix. This can be done like that:
+As a result of that, each site in Matomo has the site-id 1. In order to gather data for other than the first site, it is required to replace the table prefix. This can be done with the following command:
 
 ```
  ./console migration:measurable --source-idsite=1 --source-wp-multisite-id=2 --source-table-prefix=wp_ --target-db-host=192.168.1.1 --target-db-username=root --target-db-password=secure --target-db-name=piwik2
