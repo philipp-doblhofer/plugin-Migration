@@ -24,6 +24,8 @@ class Migrate extends ConsoleCommand
         $this->setDescription('Migrates a measurable/website from one Matomo instance to another Matomo');
 
         $this->addRequiredValueOption('source-idsite', null, 'Source Site ID you want to migrate');
+        $this->addOptionalValueOption('source-table-prefix', null, 'Source database table prefix (required if migrating from a WordPress multisite', 'wp_');
+        $this->addOptionalValueOption('source-wp-multisite-id', null, 'If migrating from a WordPress multisite, specify the WordPress Site ID', 1);
         $this->addRequiredValueOption('target-db-host', null, 'Target database host');
         $this->addRequiredValueOption('target-db-username', null, 'Target database username');
         $this->addOptionalValueOption('target-db-password', null, 'Target database password');
@@ -48,7 +50,22 @@ class Migrate extends ConsoleCommand
         $input = $this->getInput();
         $output = $this->getOutput();
         $this->checkAllRequiredOptionsAreNotEmpty();
+
+        $tablePrefix = $input->getOption('source-table-prefix');
+        $multiSiteId = (int) $input->getOption('source-wp-multisite-id');
         $idSite = (int) $input->getOption('source-idsite');
+
+        if($multiSiteId != 1) {
+            /* If migrating from a WordPress multisite, and the multisite ID is not 1, modify the table prefix.
+                Info: source-idsite has to be 1, because each WordPress multisite with "Matomo for WordPress" is in a seperated part of the database - with individual table prefixes
+                        and each idsite (Matomo's ID) is 1
+                */
+            if($idSite != 1) {
+                $output->writeln('Warning: source-idsite should probably be 1. If you try to migrate from a WordPress multisite, source-idsite is probably 1 for each WordPress multisite site.');
+            }
+            \Piwik\Config::getInstance()->database['tables_prefix'] = str_replace($tablePrefix, $tablePrefix . $multiSiteId . "_", \Piwik\Config::getInstance()->database['tables_prefix']);
+        }
+
 
         $this->checkSiteExists($idSite);
         $targetDb = $this->makeTargetDb();

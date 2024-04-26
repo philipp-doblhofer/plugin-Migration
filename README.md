@@ -32,6 +32,9 @@ To start a migration execute the `migration:measurable` command, example:
 Optional parameters are:
 
 ```
+
+ --source-table-prefix                              Source database table prefix (required if migrating from a WordPress multisite (default: 'wp_')
+ --source-wp-multisite-id                           If migrating from a WordPress multisite, specify the WordPress Site ID (default: 1)
  --target-db-prefix=piwik_                          Target database table prefix (default: "")
  --target-db-port=3306                              Target database port (default: "3306")
  --target-db-enable-ssl                             Used for establishing secure connections using SSL with target database host
@@ -65,3 +68,12 @@ Please note that the migration can take a while depending on the amount of data 
 No data from the original Matomo instance will be deleted, only new data will be added to the new Matomo instance.
 
 No premium feature data is currently being migrated.
+
+### Migrating from a WordPress multisite
+
+If you want to migrate data from a WordPress multisite, keep in mind, that the individual WordPress sites of the multisite are using different table prefixes (e.g. `wp_` for site 1, `wp_2`for site 2 and so on). This is also the case for the tables which were created from Matomo for WordPress.
+As a result of that, each site in Matomo has the site-id 1. In order to gather data for other than the first page, it is required to replace the table prefix. This can be done like that:
+
+```
+ ./console migration:measurable --source-idsite=1 --source-wp-multisite-id=2 --source-table-prefix=wp_ --target-db-host=192.168.1.1 --target-db-username=root --target-db-password=secure --target-db-name=piwik2
+```
